@@ -45,7 +45,6 @@ public class Users implements Serializable {
     private String tel;
 
     @ApiModelProperty(value = "头像")
-    @TableField("avatarUrl")
     private String avatarUrl;
 
 }
