@@ -1,6 +1,5 @@
 package com.github.jaychenfe.wxshop.service.impl;
 
-import com.github.jaychenfe.wxshop.pojo.Users;
 import com.github.jaychenfe.wxshop.service.AuthService;
 import com.github.jaychenfe.wxshop.service.SmsCodeService;
 import com.github.jaychenfe.wxshop.service.UsersService;

@@ -24,12 +24,12 @@ public class GenerateCode {
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
         gc.setOutputDir(projectPath+"/src/main/java");
-        gc.setAuthor("jaychenfe");//作者名称
+        gc.setAuthor("jaychenfe"); //作者名称
         gc.setOpen(false);
         gc.setFileOverride(false); // 是否覆盖
         gc.setIdType(IdType.ID_WORKER);
         gc.setDateType(DateType.ONLY_DATE);
-        gc.setSwagger2(true);//实体属性 Swagger2 注解
+        gc.setSwagger2(true); //实体属性 Swagger2 注解
 
         // 自定义文件命名，注意 %s 会自动填充表实体属性！
         gc.setServiceName("%sService");

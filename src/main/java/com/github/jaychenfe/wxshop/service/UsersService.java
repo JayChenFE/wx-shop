@@ -1,8 +1,7 @@
 package com.github.jaychenfe.wxshop.service;
 
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.github.jaychenfe.wxshop.pojo.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.jaychenfe.wxshop.pojo.Users;
 
 /**
  * <p>
