@@ -1,11 +1,14 @@
 package com.github.jaychenfe.wxshop.controller;
 
+import com.github.jaychenfe.wxshop.entity.LoginResponse;
 import com.github.jaychenfe.wxshop.service.AuthService;
 import com.github.jaychenfe.wxshop.service.TelVerificationService;
+import com.github.jaychenfe.wxshop.service.impl.UserContext;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -128,7 +131,48 @@ public class AuthController {
         SecurityUtils.getSubject().logout();
     }
 
-
+    /**
+     * @api {get} /status 获取登录状态
+     * @apiName Status
+     * @apiGroup 登录与鉴权
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiSuccess {User} user 用户信息
+     * @apiSuccess {Boolean} login 登录状态
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "login": true,
+     *       "user": {
+     *           "id": 123,
+     *           "name": "张三",
+     *           "tel": "13812345678",
+     *           "avatarUrl": "https://url",
+     *           "address": "北京市 西城区 100号",
+     *       }
+     *     }
+     *
+     * @apiError 401 Unauthorized 若用户未登录
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *       "message": "Unauthorized"
+     *     }
+     */
+    /**
+     * @return 登录状态
+     */
+    @GetMapping("/status")
+    public Object loginStatus() {
+        if (UserContext.getCurrentUser() == null) {
+            return LoginResponse.notLogin();
+        } else {
+            return LoginResponse.login(UserContext.getCurrentUser());
+        }
+    }
 
     public static class TelAndCode {
         private String tel;

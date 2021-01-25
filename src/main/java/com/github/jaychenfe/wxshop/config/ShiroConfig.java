@@ -1,51 +1,120 @@
 package com.github.jaychenfe.wxshop.config;
 
 
-import com.github.jaychenfe.wxshop.service.ShiroRealm;
+import com.github.jaychenfe.wxshop.service.UsersService;
+import com.github.jaychenfe.wxshop.service.impl.ShiroRealm;
+import com.github.jaychenfe.wxshop.service.impl.UserContext;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
-import org.apache.shiro.session.mgt.DefaultSessionManager;
-import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.springframework.context.annotation.Bean;
+import org.apache.shiro.codec.Base64;
+import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.CookieRememberMeManager;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.SimpleCookie;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.LinkedHashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 
 @Configuration
-public class ShiroConfig {
+public class ShiroConfig implements WebMvcConfigurer {
 
-    @Bean()
-    public ShiroFilterFactoryBean shirFilter(SecurityManager securityManager) {
+    private static final String COOKIE_NAME = "rememberMe";
 
-        //定义返回对象
+    // seconds
+    private static final int EXPIRY_TIME = 86400;
+
+    @Autowired
+    UsersService userService;
+
+    @Bean
+    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
+
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
 
-        //必须设置 SecurityManager,Shiro的核心安全接口
         shiroFilterFactoryBean.setSecurityManager(securityManager);
-
-        // 配置访问权限 必须是LinkedHashMap，因为它必须保证有序
-        // 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 一定要注意顺序,否则就不好使了
-        LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        //logout是shiro提供的过滤器
-        filterChainDefinitionMap.put("/api/login", "anon");
-        filterChainDefinitionMap.put("/api/code", "anon");
-
-        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
-
         return shiroFilterFactoryBean;
     }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new HandlerInterceptor() {
+
+            private boolean isWhitelist(HttpServletRequest request) {
+                String uri = request.getRequestURI();
+                return Arrays.asList(
+                        "/api/v1/code",
+                        "/api/v1/login",
+                        "/api/v1/status",
+                        "/api/v1/logout",
+                        "/error",
+                        "/",
+                        "/index.html",
+                        "/manifest.json"
+                ).contains(uri) || uri.startsWith("/static/");
+            }
+
+            @Override
+            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+                if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    return false;
+                }
+
+                Object tel = SecurityUtils.getSubject().getPrincipal();
+                if (tel != null) {
+                    userService.getUserByTel(tel.toString())
+                            .ifPresent(UserContext::setCurrentUser);
+                }
+
+                if (isWhitelist(request)) {
+                    return true;
+                }
+                if (UserContext.getCurrentUser() == null) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+                UserContext.clearCurrentUser();
+            }
+        });
+    }
+
 
     @Bean
     public SecurityManager securityManager(ShiroRealm shiroRealm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         //设置自定义realm.
         securityManager.setRealm(shiroRealm);
-
         //配置缓存管理器
         securityManager.setCacheManager(new MemoryConstrainedCacheManager());
+        securityManager.setRememberMeManager(rememberMeManager());
         //配置session管理器
-        securityManager.setSessionManager(new DefaultSessionManager());
+        securityManager.setSessionManager(new DefaultWebSessionManager());
         return securityManager;
+    }
+
+    private RememberMeManager rememberMeManager() {
+        SimpleCookie cookie = new SimpleCookie(COOKIE_NAME);
+        cookie.setMaxAge(EXPIRY_TIME);
+        CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
+        cookieRememberMeManager.setCookie(cookie);
+        // RememberMe cookie encryption key default AES algorithm of key length (128, 256, 512)
+        cookieRememberMeManager.setCipherKey(Base64.decode("3AvVhmFLUs0KTA3KaTHGFg=="));
+        return cookieRememberMeManager;
     }
 }

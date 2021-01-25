@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * <p>
  * 用户表 服务实现类
@@ -34,8 +36,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         try {
             usersMapper.insert(user);
         } catch (DuplicateKeyException e) {
-            return new LambdaQueryChainWrapper<>(usersMapper).eq(Users::getTel, tel).one();
+            return getUserByTel(tel).get();
         }
         return user;
+    }
+
+    @Override
+    public Optional<Users> getUserByTel(String tel) {
+        return Optional.ofNullable(new LambdaQueryChainWrapper<>(usersMapper).eq(Users::getTel, tel).one());
     }
 }

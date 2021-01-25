@@ -5,7 +5,7 @@ CREATE TABLE users(
     id bigint unsigned NOT NULL AUTO_INCREMENT  COMMENT 'id' ,
     name VARCHAR(128)    COMMENT '姓名' ,
     tel VARCHAR(32)    COMMENT '电话' ,
-    avatarUrl VARCHAR(1024)    COMMENT '头像' ,
+    avatar_url VARCHAR(1024)    COMMENT '头像' ,
     PRIMARY KEY (id)
 ) COMMENT = '用户表';
 

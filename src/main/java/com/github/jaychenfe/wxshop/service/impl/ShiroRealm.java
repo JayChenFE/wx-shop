@@ -1,5 +1,6 @@
-package com.github.jaychenfe.wxshop.service;
+package com.github.jaychenfe.wxshop.service.impl;
 
+import com.github.jaychenfe.wxshop.service.VerificationCodeCheckService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -10,7 +11,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service()
 public class ShiroRealm extends AuthorizingRealm {
 
     private final VerificationCodeCheckService verificationCodeCheckService;

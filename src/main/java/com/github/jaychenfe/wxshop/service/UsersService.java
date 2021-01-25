@@ -3,6 +3,8 @@ package com.github.jaychenfe.wxshop.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.jaychenfe.wxshop.pojo.Users;
 
+import java.util.Optional;
+
 /**
  * <p>
  * 用户表 服务类
@@ -14,4 +16,6 @@ import com.github.jaychenfe.wxshop.pojo.Users;
 public interface UsersService extends IService<Users> {
 
     Users createUserIfNotExist(String tel);
+
+    Optional<Users> getUserByTel(String tel);
 }
