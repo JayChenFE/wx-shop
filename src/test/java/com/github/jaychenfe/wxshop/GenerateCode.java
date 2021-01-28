@@ -23,19 +23,15 @@ public class GenerateCode {
         // 1、全局配置
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
-        gc.setOutputDir(projectPath+"/src/main/java");
+        gc.setOutputDir(projectPath + "/src/main/java");
         gc.setAuthor("jaychenfe"); //作者名称
         gc.setOpen(false);
         gc.setFileOverride(false); // 是否覆盖
         gc.setIdType(IdType.ID_WORKER);
         gc.setDateType(DateType.ONLY_DATE);
-        gc.setSwagger2(true); //实体属性 Swagger2 注解
 
         // 自定义文件命名，注意 %s 会自动填充表实体属性！
         gc.setServiceName("%sService");
-        gc.setControllerName("%sController");
-        gc.setServiceName("%sService");
-        gc.setServiceImplName("%sServiceImpl");
         gc.setMapperName("%sMapper");
         gc.setXmlName("%sMapper");
 
@@ -44,7 +40,7 @@ public class GenerateCode {
         //2、设置数据源
         DataSourceConfig dsc = new DataSourceConfig();
         dsc.setUrl("jdbc:mysql://localhost:3306/wx_shop?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8");
-                dsc.setDriverName("com.mysql.cj.jdbc.Driver");
+        dsc.setDriverName("com.mysql.cj.jdbc.Driver");
         // dsc.setDriverName("com.mysql.jdbc.Driver"); //mysql5.6以下的驱动
         dsc.setUsername("root");
         dsc.setPassword("123456");
@@ -56,20 +52,18 @@ public class GenerateCode {
         pc.setModuleName("wxshop"); //模块名
         pc.setEntity("pojo");
         pc.setMapper("mapper");
-        pc.setService("service");
-        pc.setController("controller");
         mpg.setPackageInfo(pc);
 
         //4、策略配置
         StrategyConfig strategy = new StrategyConfig();
-        strategy.setInclude("users"); // 设置要映射的表名
+        strategy.setInclude("USERS", "GOODS", "SHOP", "SHOPPING_CART"); // 设置要映射的表名
         strategy.setNaming(NamingStrategy.underline_to_camel);
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
         strategy.setEntityLombokModel(true); // 自动lombok；
         //strategy.setLogicDeleteFieldName("deleted");
         // 自动填充配置
-        TableFill gmtCreate = new TableFill("gmt_create", FieldFill.INSERT);
-        TableFill gmtModified = new TableFill("gmt_modified", FieldFill.INSERT_UPDATE);
+        TableFill gmtCreate = new TableFill("CREATED_AT", FieldFill.INSERT);
+        TableFill gmtModified = new TableFill("UPDATED_AT", FieldFill.INSERT_UPDATE);
         ArrayList<TableFill> tableFills = new ArrayList<>();
         tableFills.add(gmtCreate);
         tableFills.add(gmtModified);
