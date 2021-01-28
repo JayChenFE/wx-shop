@@ -5,7 +5,6 @@ import com.github.jaychenfe.wxshop.service.UsersService;
 import com.github.jaychenfe.wxshop.service.impl.ShiroRealm;
 import com.github.jaychenfe.wxshop.service.impl.UserContext;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
@@ -14,7 +13,10 @@ import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.crazycake.shiro.RedisCacheManager;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,6 +35,11 @@ public class ShiroConfig implements WebMvcConfigurer {
 
     // seconds
     private static final int EXPIRY_TIME = 86400;
+
+    @Value("${wxshop.redis.host}")
+    String redisHost;
+    @Value("${wxshop.redis.port}")
+    int redisPort;
 
     @Autowired
     UsersService userService;
@@ -96,16 +103,25 @@ public class ShiroConfig implements WebMvcConfigurer {
 
 
     @Bean
-    public SecurityManager securityManager(ShiroRealm shiroRealm) {
+    public SecurityManager securityManager(ShiroRealm shiroRealm, RedisCacheManager cacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         //设置自定义realm.
         securityManager.setRealm(shiroRealm);
         //配置缓存管理器
-        securityManager.setCacheManager(new MemoryConstrainedCacheManager());
+        securityManager.setCacheManager(cacheManager);
         securityManager.setRememberMeManager(rememberMeManager());
         //配置session管理器
         securityManager.setSessionManager(new DefaultWebSessionManager());
         return securityManager;
+    }
+
+    @Bean
+    public RedisCacheManager redisCacheManager() {
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost(redisHost + ":" + redisPort);
+        redisCacheManager.setRedisManager(redisManager);
+        return redisCacheManager;
     }
 
     private RememberMeManager rememberMeManager() {

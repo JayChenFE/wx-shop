@@ -10,3 +10,9 @@ spring:
   mybatis-plus:
     configuration:
       log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+wxshop:
+  redis:
+    host: localhost
+    port: 6379
