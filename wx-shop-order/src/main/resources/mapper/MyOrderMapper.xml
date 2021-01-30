@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.jaychenfe.order.mapper.MyOrderMapper">
+    <insert id="insertOrders" parameterType="OrderInfo">
+        insert into `ORDER_GOODS`(GOODS_ID, ORDER_ID, NUMBER)
+        values
+        <foreach item="item" collection="goods"
+                 separator=",">
+            (#{item.id}, #{orderId}, #{item.number})
+        </foreach>
+    </insert>
+    <select id="getGoodsInfoOfOrder" parameterType="long" resultType="GoodsInfo">
+        SELECT GOODS_ID as id,
+               NUMBER   as number
+        FROM ORDER_GOODS
+        WHERE ORDER_ID = #{id}
+    </select>
+</mapper>
